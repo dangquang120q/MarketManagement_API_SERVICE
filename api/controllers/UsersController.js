@@ -13,33 +13,20 @@ const { sync } = require("load-json-file");
 module.exports = {
   addMember: async (req, res) => {
     log("Signup from addMember: " + JSON.stringify(req.body));
+    let id = req.body.id;
     let name = req.body.name;
     let gender = req.body.gender;
     let dob = req.body.dob;
     try {
-      let sql = sqlString.format("select * from Member where name = ?", [name]);
-      let data = await sails
+      let sqlInsertUser = sqlString.format("insert into Member(id,name,gender,dob) values(?,?,?,?)", [name,gender,dob]);
+      await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
-        .sendNativeQuery(sql);
-      if(data["rows"].length != 0){
-        response = new HttpResponse(
-          { msg: "Name existed" },
-          { statusCode: 402, error: true }
-        );
-        res.status(402);
-        return res.send(response);
-      }
-      else{
-        let sqlInsertUser = sqlString.format("insert into Member(name,gender,dob) values(?,?,?)", [name,gender,dob]);
-        await sails
-          .getDatastore(process.env.MYSQL_DATASTORE)
-          .sendNativeQuery(sqlInsertUser);
-        response = new HttpResponse(
-          { msg: "Add Member successful" },
-          { statusCode: 200, error: false }
-        );
-        return res.ok(response);
-      }
+        .sendNativeQuery(sqlInsertUser);
+      response = new HttpResponse(
+        { msg: "Add Member successful" },
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
     } catch (error) {
       return res.serverError("Something bad happened on the server: " + error);
     }
