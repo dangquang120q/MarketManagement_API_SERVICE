@@ -43,9 +43,11 @@ module.exports.routes = {
   "POST /getListSupplier": "StaffController.getListSupplier",
   "POST /getListInvoice": "StaffController.getListInvoice",
   "POST /getListReceipt": "StaffController.getListReceipt",
-  "POST /getInvoice": "UsersController.getInvoice",
-  "POST /getReceipt": "UsersController.getReceipt",
+  "POST /getInvoice": "StaffController.getInvoice",
+  "POST /getReceipt": "StaffController.getReceipt",
 
+  "POST /statistics": "StaffController.statistics",
+  "POST /productStatistics": "StaffController.productStatistics",
   /***************************************************************************
    *                                                                          *
    * More custom routes here...                                               *
