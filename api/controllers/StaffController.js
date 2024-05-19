@@ -302,7 +302,7 @@ module.exports = {
         if (memberId != "") {
           let priceAfter = total - reducedAmount * 1000;
           let pointEarn = Math.round(priceAfter / 10000) - reducedAmount;
-          let sql2 = sqlString.format("update Member set point = point + ? where memberId = ?", [pointEarn, memberId]);
+          let sql2 = sqlString.format("update Member set point = point + ? where id = ?", [pointEarn, memberId]);
           log(sql2);
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
