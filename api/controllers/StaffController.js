@@ -286,12 +286,9 @@ module.exports = {
         let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
-        let invoiceId = data["insertId"];
-        log(JSON.stringify(data));
-        log(products);
         for (let index = 0; index < products.length; index++) {
           const element = products[index];
-          let sql3 = sqlString.format("insert into ProductInvoice(productId,invoiceId,qty,price) values(?,?,?,?)", [element["id"],invoiceId,element["qty"],element["price"]]);
+          let sql3 = sqlString.format("insert into ProductInvoice(productId,invoiceId,qty,price) values(?,?,?,?)", [element["id"],id,element["qty"],element["price"]]);
           log(sql3);
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
@@ -333,14 +330,12 @@ module.exports = {
     try {
         let sql = sqlString.format("insert into Receipt(id,staffId,supplierId,total) values(?,?,?,?)", [id,staffId,supplierId,total]);
         log(sql);
-        let data = await sails
+        await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
-          let receiptId = data["insertId"];
-        log(products)
         for (let index = 0; index < products.length; index++) {
           const element = products[index];
-          let sql3 = sqlString.format("insert into ProductReceipt(productId,receiptId,qty,price) values(?,?,?,?)", [element["id"],receiptId,element["qty"],element["price"]]);
+          let sql3 = sqlString.format("insert into ProductReceipt(productId,receiptId,qty,price) values(?,?,?,?)", [element["id"],id,element["qty"],element["price"]]);
           log(sql3);
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
