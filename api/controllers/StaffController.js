@@ -256,7 +256,11 @@ module.exports = {
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
             .sendNativeQuery(sql3);
-          log(element);
+          let sql4 = sqlString.format("update Product set total = total - ? where id = ?", [total,id]);
+          log(sql4);
+          await sails
+              .getDatastore(process.env.MYSQL_DATASTORE)
+              .sendNativeQuery(sql4);
         }
         if (memberId != "") {
           let priceAfter = total - reducedAmount * 1000;
@@ -300,7 +304,11 @@ module.exports = {
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
             .sendNativeQuery(sql3);
-          log(element);
+          let sql4 = sqlString.format("update Product set total = total + ? where id = ?", [total,id]);
+          log(sql4);
+          await sails
+              .getDatastore(process.env.MYSQL_DATASTORE)
+              .sendNativeQuery(sql4);
         }
 
         response = new HttpResponse(
