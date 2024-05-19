@@ -20,40 +20,28 @@ module.exports.routes = {
 
   "/": { view: "pages/homepage" },
 
-  "POST /login": "StaffController.login",
   
   "POST /addMember": "UsersController.addMember",
   "POST /updateMember": "UsersController.updateMember",
   "POST /deleteMember": "UsersController.deleteMember",
   "POST /getMember": "UsersController.getMember",
   "POST /getListMember": "UsersController.getListMember",
-
+  
+  "POST /login": "StaffController.login",
   "POST /changeProduct": "StaffController.changeProduct",
   "POST /changeCategory": "StaffController.changeCategory",
   "POST /changeSupplier": "StaffController.changeSupplier",
+  "POST /changeStaff": "StaffController.changeStaff",
 
-  // "POST /user/logout": "StaffController.logout",
-  // "POST /user/sendReview": "StaffController.sendReview",
-  // "POST /user/getReview": "StaffController.getReview",
-  // "POST /user/addFavourite": "StaffController.addFavourite",
-  // "POST /user/getFavourite": "StaffController.getFavourite",
+  "POST /createInvoice": "StaffController.createInvoice",
+  "POST /createReceipt": "StaffController.createReceipt",
 
-  // "POST /product/getCategory": "ProductController.getCategory",
-  // "POST /product/getProductByCategory": "ProductController.getProductByCategory",
-  // "POST /product/searchProduct": "ProductController.searchProduct",
-  // "POST /product/viewProduct": "ProductController.viewProduct",
-  // "POST /product/sendFeedback": "ProductController.sendFeedback",
-  // "POST /product/getFeedback": "ProductController.getFeedback",
-
-  // "POST /cart/addProductToCart": "CartController.addProductToCart",
-  // "POST /cart/viewCart": "CartController.viewCart",
-  // "POST /cart/order": "CartController.order",
-  // "POST /cart/viewOrder": "CartController.viewOrder",
-  // "POST /cart/listAddress": "CartController.listAddress",
-  // "POST /cart/addAddress": "CartController.addAddress",
-  // "POST /cart/editAddress": "CartController.editAddress",
-  // "POST /cart/deleteAddress": "CartController.deleteAddress",
-
+  "POST /getListStaff": "StaffController.getListStaff",
+  "POST /getListProduct": "StaffController.getListProduct",
+  "POST /getListCategory": "StaffController.getListCategory",
+  "POST /getListSupplier": "StaffController.getListSupplier",
+  "POST /getListInvoice": "StaffController.getListInvoice",
+  "POST /getListReceipt": "StaffController.getListReceipt",
   /***************************************************************************
    *                                                                          *
    * More custom routes here...                                               *

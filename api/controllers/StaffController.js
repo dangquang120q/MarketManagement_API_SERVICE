@@ -42,18 +42,15 @@ module.exports = {
   changeStaff: async (req, res) => {
     let response;
     let type = req.body.type;
-    let id = req.body.id;
     let name = req.body.name;
     let phone = req.body.phone;
     let email = req.body.email;
     let role = req.body.role;
-    let username = req.body.username;
-    let password = req.body.password;
     let dob = req.body.dob;
-
+    let id = "NV" + phone.slice(0,8);
     try {
         if (type == 1) {
-            let sql = sqlString.format("insert into Staff(name,phone,email,role,username,password,dob) values(?,?,?,?,?,?,?)", [name,phone,email,role,username,password,dob]);
+            let sql = sqlString.format("insert into Staff(id,name,phone,email,role,username,password,dob) values(?,?,?,?,?,?,?,?)", [id,name,phone,email,role,id,dob,dob]);
             log(sql);
             await sails
               .getDatastore(process.env.MYSQL_DATASTORE)
@@ -238,19 +235,41 @@ module.exports = {
   // },
   createInvoice: async (req, res) => {
     let response;
+    let id = req.body.id;
     let staffId = req.body.staffId;
-    let memberId = req.body.memberId;
-    let reduceAmount = req.body.reduceAmount;
+    let memberId = req.body.memberId || "";
+    let products = req.body.products;
+    let total = req.body.total;
+    let reducedAmount = req.body.reducedAmount;
 
     try {
-        let sql = sqlString.format("insert into Invoice(staffId,memberId,reduceAmount) values(?,?,?,?,?,?)", [name,address,email,phone,tax,website]);
+        let sql = sqlString.format("insert into Invoice(id,staffId,memberId,reducedAmount,total) values(?,?,?,?.?)", [id,staffId,memberId,reducedAmount,total]);
         log(sql);
-        await sails
+        let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
-      
+        let invoiceId = data[insertId];
+        for (let index = 0; index < products.length; index++) {
+          const element = products[index];
+          let sql3 = sqlString.format("insert into ProductInvoice(productId,invoiceId,qty,price) values(?,?,?,?)", [element["id"],invoiceId,element["qty"],element["price"]]);
+          log(sql3);
+          await sails
+            .getDatastore(process.env.MYSQL_DATASTORE)
+            .sendNativeQuery(sql3);
+          log(element);
+        }
+        if (memberId != "") {
+          let priceAfter = total - reducedAmount * 1000;
+          let pointEarn = Math.round(priceAfter / 10000) - reducedAmount;
+          let sql2 = sqlString.format("update Member set point = point + ? where memberId = ?", [pointEarn, memberId]);
+          log(sql2);
+          await sails
+            .getDatastore(process.env.MYSQL_DATASTORE)
+            .sendNativeQuery(sql2);
+        }
+
         response = new HttpResponse(
-            "Change Product Successful",
+            "Create Invoice Successful",
             { statusCode: 200, error: false }
         );
         return res.ok(response);
@@ -258,4 +277,137 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+
+  createReceipt: async (req, res) => {
+    let response;
+    let id = req.body.id;
+    let staffId = req.body.staffId;
+    let supplierId = req.body.supplierId || "";
+    let products = req.body.products;
+    let total = req.body.total;
+
+    try {
+        let sql = sqlString.format("insert into Receipt(id,staffId,supplierId,total) values(?,?,?,?)", [id,staffId,supplierId,total]);
+        log(sql);
+        let data = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+        let receiptId = data[insertId];
+        for (let index = 0; index < products.length; index++) {
+          const element = products[index];
+          let sql3 = sqlString.format("insert into ProductReceipt(productId,receiptId,qty,price) values(?,?,?,?)", [element["id"],receiptId,element["qty"],element["price"]]);
+          log(sql3);
+          await sails
+            .getDatastore(process.env.MYSQL_DATASTORE)
+            .sendNativeQuery(sql3);
+          log(element);
+        }
+
+        response = new HttpResponse(
+            "Create Receipt Successful",
+            { statusCode: 200, error: false }
+        );
+        return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+
+  getListStaff: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Staff");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(
+        data["rows"],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getListProduct: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Product");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(
+        data["rows"],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getListCategory: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Category");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(
+        data["rows"],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getListSupplier: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Supplier");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(
+        data["rows"],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getListInvoice: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Invoice");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(
+        data["rows"],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getListReceipt: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Receipt");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(
+        data["rows"],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+
 };
