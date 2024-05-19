@@ -286,7 +286,8 @@ module.exports = {
         let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
-        let invoiceId = data[insertId];
+        let invoiceId = data["insertId"];
+        log(products);
         for (let index = 0; index < products.length; index++) {
           const element = products[index];
           let sql3 = sqlString.format("insert into ProductInvoice(productId,invoiceId,qty,price) values(?,?,?,?)", [element["id"],invoiceId,element["qty"],element["price"]]);
@@ -334,7 +335,8 @@ module.exports = {
         let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
-        let receiptId = data[insertId];
+          let receiptId = data["insertId"];
+        log(products)
         for (let index = 0; index < products.length; index++) {
           const element = products[index];
           let sql3 = sqlString.format("insert into ProductReceipt(productId,receiptId,qty,price) values(?,?,?,?)", [element["id"],receiptId,element["qty"],element["price"]]);
