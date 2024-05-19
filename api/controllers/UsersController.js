@@ -37,9 +37,9 @@ module.exports = {
     let gender = req.body.gender;
     let dob = req.body.dob;
     let point = req.body.point;
-    let member_id = req.body.member_id;
+    let id = req.body.id;
     try {
-      let sqlUpdate = sqlString.format("update Member set name = ?,gender = ?,dob = ?,point = ? where id = ?", [name,gender,dob,point,member_id]);
+      let sqlUpdate = sqlString.format("update Member set name = ?,gender = ?,dob = ?,point = ? where id = ?", [name,gender,dob,point,id]);
       await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sqlUpdate);
@@ -55,9 +55,9 @@ module.exports = {
   deleteMember: async (req, res) => {
     console.log(123);
     let response;
-    let member_id = req.body.member_id;
+    let id = req.body.id;
     try {
-      let sql = sqlString.format("delete from Member where id = ?", [member_id]);
+      let sql = sqlString.format("delete from Member where id = ?", [id]);
       await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
@@ -72,9 +72,9 @@ module.exports = {
   },
   getMember: async (req, res) => {
     let response;
-    let name = req.body.name;
+    let id = req.body.id;
     try {
-      let sql = sqlString.format("select * from Member where name = ?", [name]);
+      let sql = sqlString.format("select * from Member where id = ?", [id]);
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
