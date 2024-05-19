@@ -57,7 +57,7 @@ module.exports = {
               .sendNativeQuery(sql);
         }
         else if(type == 2){
-            let sql = sqlString.format("update Staff set name = ?,phone = ?,email = ?,role = ?,username = ?,password = ?,dob = ? where id = ?", [name,phone,email,role,username,password,dob,id]);
+            let sql = sqlString.format("update Staff set name = ?,phone = ?,email = ?,role = ?,username = ?,password = ?,dob = ? where id = ?", [name,phone,email,role,id,dob,dob,id]);
             log(sql);
             await sails
                 .getDatastore(process.env.MYSQL_DATASTORE)
@@ -499,5 +499,26 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  statistics: async (req, res) => {
+    let response;
+    let type = req.body.type;
+    try {
+      if(type == 1){
+        let sql = sqlString.format("select * from ProductInvoice");
+        let data = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+        response = new HttpResponse(
+          data["rows"],
+          { statusCode: 200, error: false }
+        );
+        return res.ok(response);
+      }
+      else{
 
+      }
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
 };
