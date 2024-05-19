@@ -44,7 +44,7 @@ module.exports = {
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sqlUpdate);
       response = new HttpResponse(
-        "Change Info Successful",
+        { msg: "Change Info Successful" },
         { statusCode: 200, error: false }
       );
       return res.ok(response);
@@ -62,7 +62,7 @@ module.exports = {
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
       response = new HttpResponse(
-        "Delete Successful",
+        { msg: "Delete Successful" },
         { statusCode: 200, error: false }
       );
       return res.ok(response);
@@ -80,7 +80,7 @@ module.exports = {
         .sendNativeQuery(sql);
       if (data["rows"].length == 0) {
         response = new HttpResponse(
-          "No User Existed",
+          { msg: "No User Existed" },
           { statusCode: 200, error: false }
         );
       }
