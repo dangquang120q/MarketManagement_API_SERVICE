@@ -385,6 +385,29 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  getInvoice: async (req, res) => {
+    let response;
+    let id = req.body.id;
+    try {
+      let sql = sqlString.format("select * from Invoice where id = ?", [id]);
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      if (data["rows"].length == 0) {
+        response = new HttpResponse(
+          { msg: "No Invoice Existed" },
+          { statusCode: 200, error: false }
+        );
+      }
+      response = new HttpResponse(
+        data["rows"][0],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
   getListInvoice: async (req, res) => {
     let response;
     try {
@@ -394,6 +417,29 @@ module.exports = {
         .sendNativeQuery(sql);
       response = new HttpResponse(
         data["rows"],
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getReceipt: async (req, res) => {
+    let response;
+    let id = req.body.id;
+    try {
+      let sql = sqlString.format("select * from Receipt where id = ?", [id]);
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      if (data["rows"].length == 0) {
+        response = new HttpResponse(
+          { msg: "No Receipt Existed" },
+          { statusCode: 200, error: false }
+        );
+      }
+      response = new HttpResponse(
+        data["rows"][0],
         { statusCode: 200, error: false }
       );
       return res.ok(response);
