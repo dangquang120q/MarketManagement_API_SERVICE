@@ -283,7 +283,7 @@ module.exports = {
     try {
         let sql = sqlString.format("insert into Invoice(id,staffId,memberId,reducedAmount,total) values(?,?,?,?,?)", [id,staffId,memberId,reducedAmount,total]);
         log(sql);
-        let data = await sails
+        await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
         for (let index = 0; index < products.length; index++) {
@@ -293,7 +293,7 @@ module.exports = {
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
             .sendNativeQuery(sql3);
-          let sql4 = sqlString.format("update Product set total = total - ? where id = ?", [total,id]);
+          let sql4 = sqlString.format("update Product set total = total - ? where id = ?", [total,element["id"]]);
           log(sql4);
           await sails
               .getDatastore(process.env.MYSQL_DATASTORE)
