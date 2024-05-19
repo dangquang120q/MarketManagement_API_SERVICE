@@ -121,17 +121,17 @@ module.exports = {
     let type = req.body.type;
     let id = req.body.id;
     let name = req.body.name;
-    let productId = req.body.productId;
+    let categoryId = req.body.categoryId;
     try {
         if (type == 1) {
-            let sql = sqlString.format("insert into Booth(id,name,productId) values(?,?,?)", [id,name,productId]);
+            let sql = sqlString.format("insert into Booth(id,name,categoryId) values(?,?,?)", [id,name,categoryId]);
             log(sql);
             await sails
               .getDatastore(process.env.MYSQL_DATASTORE)
               .sendNativeQuery(sql);
         }
         else if(type == 2){
-            let sql = sqlString.format("update Booth set name = ?,productId = ? where id = ?", [name,productId,id]);
+            let sql = sqlString.format("update Booth set name = ?,categoryId = ? where id = ?", [name,categoryId,id]);
             log(sql);
             await sails
                 .getDatastore(process.env.MYSQL_DATASTORE)
