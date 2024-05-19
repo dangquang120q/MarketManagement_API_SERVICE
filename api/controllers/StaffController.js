@@ -59,7 +59,7 @@ module.exports = {
               .sendNativeQuery(sql);
         }
         else if(type == 2){
-            let sql = sqlString.format("update Staff set name = ?,phone = ?,email = ?,role = ?,username = ?,password = ?,dob = ? where id = ?", [name,phone,email,role,username,password,dob,id]);
+            let sql = sqlString.format("update Staff set name = ?,phone = ?,email = ?,role = ?,dob = ? where id = ?", [name,phone,email,role,dob,id]);
             log(sql);
             await sails
                 .getDatastore(process.env.MYSQL_DATASTORE)
@@ -504,9 +504,22 @@ module.exports = {
   statistics: async (req, res) => {
     let response;
     let type = req.body.type;
+    let startDate = req.body.startDate;
+    let endDate = req.body.endDate;
     try {
       if(type == 1){
-        let sql = sqlString.format("select * from ProductInvoice");
+        let sql = sqlString.format(`SELECT 
+        DATE_FORMAT(createdDate, '%Y-%m') AS month,
+            SUM(price) AS Revenue
+        FROM 
+            ProductInvoice
+        WHERE 
+            createdDate >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        GROUP BY 
+            DATE_FORMAT(createdDate, '%Y-%m')
+        ORDER BY 
+            month;
+        `);
         let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
@@ -517,7 +530,83 @@ module.exports = {
         return res.ok(response);
       }
       else{
-
+        let sql = sqlString.format(`SELECT 
+              DATE(createdDate) AS date,
+              SUM(qty * price) AS total_price
+          FROM 
+              ProductInvoice
+          WHERE 
+              createdDate BETWEEN ? AND ?
+          GROUP BY 
+              DATE(createdDate)
+          ORDER BY 
+              date;
+        `,[startDate,endDate]);
+        let data = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+        response = new HttpResponse(
+          data["rows"],
+          { statusCode: 200, error: false }
+        );
+        return res.ok(response);
+      }
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  productStatistics: async (req, res) => {
+    let response;
+    let type = req.body.type;
+    try {
+      if(type == 1){
+        let sql = sqlString.format(`SELECT 
+              productId,
+              SUM(qty) AS total_sold
+          FROM 
+              ProductInvoice
+          GROUP BY 
+              productId
+          ORDER BY 
+            total_sold DESC LIMIT 10;    
+        `);
+        let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+        for (let index = 0; index < data["rows"].length; index++) {
+          const element = data["rows"][index];
+          let sql2 = sqlString.format("select * from Product where id = ?", [element["productId"]]);
+          let data2 = await sails
+            .getDatastore(process.env.MYSQL_DATASTORE)
+            .sendNativeQuery(sql2);
+        }
+        response = new HttpResponse(
+          data["rows"],
+          { statusCode: 200, error: false }
+        );
+        return res.ok(response);
+      }
+      else{
+        let sql = sqlString.format(`SELECT 
+              DATE(createdDate) AS date,
+              SUM(qty * price) AS total_price
+          FROM 
+              ProductInvoice
+          WHERE 
+              createdDate BETWEEN ? AND ?
+          GROUP BY 
+              DATE(createdDate)
+          ORDER BY 
+              date;
+        `,[startDate,endDate]);
+        let data = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+        response = new HttpResponse(
+          data["rows"],
+          { statusCode: 200, error: false }
+        );
+        return res.ok(response);
       }
     } catch (error) {
       return res.serverError("Something bad happened on the server: " + error);
