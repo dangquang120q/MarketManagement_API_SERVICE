@@ -508,7 +508,7 @@ module.exports = {
       if(type == 1){
         let sql = sqlString.format(`SELECT 
         DATE_FORMAT(createdDate, '%Y-%m') AS month,
-            SUM(price) AS Revenue
+            SUM(qty * price) AS Revenue
         FROM 
             ProductInvoice
         WHERE 
