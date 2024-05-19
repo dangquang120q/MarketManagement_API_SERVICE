@@ -340,7 +340,7 @@ module.exports = {
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
             .sendNativeQuery(sql3);
-          let sql4 = sqlString.format("update Product set total = total + ? where id = ?", [total,id]);
+          let sql4 = sqlString.format("update Product set total = total + ? where id = ?", [element["qty"],element["id"]]);
           log(sql4);
           await sails
               .getDatastore(process.env.MYSQL_DATASTORE)
