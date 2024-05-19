@@ -70,7 +70,7 @@ module.exports = {
                 .sendNativeQuery(sql);
         }
         response = new HttpResponse(
-            "Change Staff Successful",
+            { msg: "Change Staff Successful" },
             { statusCode: 200, error: false }
         );
         return res.ok(response);
@@ -106,7 +106,7 @@ module.exports = {
                 .sendNativeQuery(sql);
         }
         response = new HttpResponse(
-            "Change Category Successful",
+            { msg: "Change Category Successful" },
             { statusCode: 200, error: false }
         );
         return res.ok(response);
@@ -145,7 +145,7 @@ module.exports = {
                 .sendNativeQuery(sql);
         }
         response = new HttpResponse(
-            "Change Product Successful",
+            { msg: "Change Product Successful" },
             { statusCode: 200, error: false }
         );
         return res.ok(response);
@@ -185,8 +185,8 @@ module.exports = {
                 .sendNativeQuery(sql);
         }
         response = new HttpResponse(
-            "Change Product Successful",
-            { statusCode: 200, error: false }
+          { msg: "Change Supplier Successful" },
+          { statusCode: 200, error: false }
         );
         return res.ok(response);
     } catch (error) {
@@ -269,7 +269,7 @@ module.exports = {
         }
 
         response = new HttpResponse(
-            "Create Invoice Successful",
+          { msg: "Create Invoice Successful" },
             { statusCode: 200, error: false }
         );
         return res.ok(response);
@@ -304,7 +304,7 @@ module.exports = {
         }
 
         response = new HttpResponse(
-            "Create Receipt Successful",
+            { msg: "Create Receipt Successful" },
             { statusCode: 200, error: false }
         );
         return res.ok(response);
