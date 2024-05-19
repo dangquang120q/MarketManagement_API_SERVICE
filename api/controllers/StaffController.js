@@ -637,4 +637,20 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  getListBooth: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Booth");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(data["rows"], {
+        statusCode: 200,
+        error: false,
+      });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
 };
