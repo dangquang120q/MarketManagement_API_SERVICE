@@ -30,6 +30,7 @@ module.exports.routes = {
   "POST /login": "StaffController.login",
   "POST /changeProduct": "StaffController.changeProduct",
   "POST /changeCategory": "StaffController.changeCategory",
+  "POST /changeBooth": "StaffController.changeBooth",
   "POST /changeSupplier": "StaffController.changeSupplier",
   "POST /changeStaff": "StaffController.changeStaff",
 

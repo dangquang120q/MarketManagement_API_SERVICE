@@ -114,6 +114,42 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  changeBooth: async (req, res) => {
+    let response;
+    let type = req.body.type;
+    let id = req.body.id;
+    let name = req.body.name;
+    let productId = req.body.productId;
+    try {
+        if (type == 1) {
+            let sql = sqlString.format("insert into Booth(id,name,productId) values(?,?,?)", [id,name,productId]);
+            log(sql);
+            await sails
+              .getDatastore(process.env.MYSQL_DATASTORE)
+              .sendNativeQuery(sql);
+        }
+        else if(type == 2){
+            let sql = sqlString.format("update Booth set name = ?,productId = ? where id = ?", [name,productId,id]);
+            log(sql);
+            await sails
+                .getDatastore(process.env.MYSQL_DATASTORE)
+                .sendNativeQuery(sql);
+        }
+        else{
+            let sql = sqlString.format("delete from Booth where id = ?", [id]);
+            await sails
+                .getDatastore(process.env.MYSQL_DATASTORE)
+                .sendNativeQuery(sql);
+        }
+        response = new HttpResponse(
+            { msg: "Change Booth Successful" },
+            { statusCode: 200, error: false }
+        );
+        return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
   changeProduct: async (req, res) => {
     let response;
     let type = req.body.type;
