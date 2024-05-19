@@ -281,7 +281,7 @@ module.exports = {
     let reducedAmount = req.body.reducedAmount;
 
     try {
-        let sql = sqlString.format("insert into Invoice(id,staffId,memberId,reducedAmount,total) values(?,?,?,?.?)", [id,staffId,memberId,reducedAmount,total]);
+        let sql = sqlString.format("insert into Invoice(id,staffId,memberId,reducedAmount,total) values(?,?,?,?,?)", [id,staffId,memberId,reducedAmount,total]);
         log(sql);
         let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
