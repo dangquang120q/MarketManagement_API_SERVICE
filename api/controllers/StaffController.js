@@ -47,17 +47,19 @@ module.exports = {
     let email = req.body.email;
     let role = req.body.role;
     let dob = req.body.dob;
-    let id = "NV" + phone.slice(0,8);
+    let id = req.body.id;
+    let username = req.body.username;
+    let password = req.body.password;
     try {
         if (type == 1) {
-            let sql = sqlString.format("insert into Staff(id,name,phone,email,role,username,password,dob) values(?,?,?,?,?,?,?,?)", [id,name,phone,email,role,id,dob,dob]);
+            let sql = sqlString.format("insert into Staff(id,name,phone,email,role,username,password,dob) values(?,?,?,?,?,?,?,?)", [id,name,phone,email,role,username,password,dob]);
             log(sql);
             await sails
               .getDatastore(process.env.MYSQL_DATASTORE)
               .sendNativeQuery(sql);
         }
         else if(type == 2){
-            let sql = sqlString.format("update Staff set name = ?,phone = ?,email = ?,role = ?,username = ?,password = ?,dob = ? where id = ?", [name,phone,email,role,id,dob,dob,id]);
+            let sql = sqlString.format("update Staff set name = ?,phone = ?,email = ?,role = ?,username = ?,password = ?,dob = ? where id = ?", [name,phone,email,role,username,password,dob,id]);
             log(sql);
             await sails
                 .getDatastore(process.env.MYSQL_DATASTORE)
