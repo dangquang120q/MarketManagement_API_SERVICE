@@ -18,7 +18,7 @@ module.exports = {
     let gender = req.body.gender;
     let dob = req.body.dob;
     try {
-      let sqlInsertUser = sqlString.format("insert into Member(id,name,gender,dob) values(?,?,?,?)", [name,gender,dob]);
+      let sqlInsertUser = sqlString.format("insert into Member(id,name,gender,dob) values(?,?,?,?)", [id,name,gender,dob]);
       await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sqlInsertUser);
