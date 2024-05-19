@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: 'api-sails-gamehub',
+    name: 'api-sails-htttql',
     script: './app.js',
     watch: '.',
     exec_mode: 'cluster',
