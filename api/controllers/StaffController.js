@@ -287,6 +287,7 @@ module.exports = {
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
         let invoiceId = data["insertId"];
+        log(JSON.stringify(data));
         log(products);
         for (let index = 0; index < products.length; index++) {
           const element = products[index];
