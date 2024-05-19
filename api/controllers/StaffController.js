@@ -560,6 +560,7 @@ module.exports = {
     let type = req.body.type;
     try {
       if(type == 1){
+        let response_data = [];
         let sql = sqlString.format(`SELECT 
               productId,
               SUM(qty) AS total_sold
@@ -579,31 +580,57 @@ module.exports = {
           let data2 = await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
             .sendNativeQuery(sql2);
+          let name = data2["rows"][0]["name"];
+          let obj = {};
+          obj.name = name;
+          obj.sum = element["total_sold"];
+          response_data.push(obj);
         }
         response = new HttpResponse(
-          data["rows"],
+          response_data,
           { statusCode: 200, error: false }
         );
         return res.ok(response);
       }
       else{
+        let response_data = [];
         let sql = sqlString.format(`SELECT 
-              DATE(createdDate) AS date,
-              SUM(qty * price) AS total_price
-          FROM 
-              ProductInvoice
-          WHERE 
-              createdDate BETWEEN ? AND ?
-          GROUP BY 
-              DATE(createdDate)
-          ORDER BY 
-              date;
-        `,[startDate,endDate]);
+            p.id,
+            p.name,
+            p.total
+        FROM 
+            Product p
+        LEFT JOIN 
+            ProductInvoice pi ON p.id = pi.productId 
+            AND pi.createdDate >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH)
+        WHERE 
+            pi.productId IS NULL;
+        `);
         let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
+        for (let index = 0; index < data["rows"].length; index++) {
+            const element = data["rows"][index];
+            let sql2 = sqlString.format(`SELECT 
+              SUM(qty) AS total_import
+              FROM 
+                  ProductReceipt
+              WHERE
+                productId = ? 
+          `,[element["id"]]);
+          let data2 = await sails
+            .getDatastore(process.env.MYSQL_DATASTORE)
+            .sendNativeQuery(sql2);
+          if (data2["rows"][0]["total_import"] < element["total"] * 2) {
+            let obj = {};
+            obj.name = element["name"];
+            obj.total = element["total"];
+            obj.total_import = data2["rows"][0]["total_import"];
+            response_data.push(obj);
+          }
+        }
         response = new HttpResponse(
-          data["rows"],
+          response_data,
           { statusCode: 200, error: false }
         );
         return res.ok(response);
