@@ -597,7 +597,7 @@ module.exports = {
             qty: element["qty"],
             unit: dataProduct["rows"][0]["unit"],
             price: dataProduct["rows"][0]["price"],
-            importPrice: element["importPrice"],
+            importPrice: element["price"],
           };
           products.push(product);
         }
