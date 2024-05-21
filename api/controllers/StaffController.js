@@ -335,7 +335,7 @@ module.exports = {
           .sendNativeQuery(sql);
         for (let index = 0; index < products.length; index++) {
           const element = products[index];
-          let sql3 = sqlString.format("insert into ProductReceipt(productId,receiptId,qty,price) values(?,?,?,?)", [element["id"],id,element["qty"],element["price"]]);
+          let sql3 = sqlString.format("insert into ProductReceipt(productId,receiptId,qty,price) values(?,?,?,?)", [element["id"],id,element["qty"],element["importPrice"]]);
           log(sql3);
           await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
