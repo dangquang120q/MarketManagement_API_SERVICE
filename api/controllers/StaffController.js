@@ -429,14 +429,47 @@ module.exports = {
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
+      let response_data = data["rows"][0];
       if (data["rows"].length == 0) {
         response = new HttpResponse(
           { msg: "No Invoice Existed" },
           { statusCode: 200, error: false }
         );
       }
+      else{
+        let sqlStaff = sqlString.format("select * from Staff where id = ?", [data["rows"][0]["staffId"]]);
+        let dataStaff = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sqlStaff);
+        response_data.staff = dataStaff["rows"][0];
+        let sqlMember = sqlString.format("select * from Member where id = ?", [data["rows"][0]["memberId"]]);
+        let dataMember = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sqlMember);
+        response_data.member = dataMember["rows"][0];
+        let sqlProducts = sqlString.format("select * from ProductInvoice where invoiceId = ?", [id]);
+        let dataProducts = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sqlProducts);
+        let products = [];
+        for (let index = 0; index < dataProducts["rows"].length; index++) {
+          const element = dataProducts["rows"][index];
+          let sqlProduct = sqlString.format("select * from Product where id = ?", [element["productId"]]);
+          let dataProduct = await sails
+            .getDatastore(process.env.MYSQL_DATASTORE)
+            .sendNativeQuery(sqlProduct);
+          let product = {
+            name: dataProduct["rows"][0]["name"],
+            qty: element["qty"],
+            unit: dataProduct["rows"][0]["unit"],
+            price: dataProduct["rows"][0]["price"]
+          };
+          products.push(product);
+        }
+        response_data.products = products;
+      }
       response = new HttpResponse(
-        data["rows"][0],
+        response_data,
         { statusCode: 200, error: false }
       );
       return res.ok(response);
@@ -468,14 +501,47 @@ module.exports = {
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
+      let response_data = data["rows"][0];
       if (data["rows"].length == 0) {
         response = new HttpResponse(
           { msg: "No Receipt Existed" },
           { statusCode: 200, error: false }
         );
       }
+      else{
+        let sqlStaff = sqlString.format("select * from Staff where id = ?", [data["rows"][0]["staffId"]]);
+        let dataStaff = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sqlStaff);
+        response_data.staff = dataStaff["rows"][0];
+        let sqlSupplier = sqlString.format("select * from Supplier where id = ?", [data["rows"][0]["supplierId"]]);
+        let dataSupplier = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sqlSupplier);
+        response_data.supplier = dataSupplier["rows"][0];
+        let sqlProducts = sqlString.format("select * from ProductReceipt where receiptId = ?", [id]);
+        let dataProducts = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sqlProducts);
+        let products = [];
+        for (let index = 0; index < dataProducts["rows"].length; index++) {
+          const element = dataProducts["rows"][index];
+          let sqlProduct = sqlString.format("select * from Product where id = ?", [element["productId"]]);
+          let dataProduct = await sails
+            .getDatastore(process.env.MYSQL_DATASTORE)
+            .sendNativeQuery(sqlProduct);
+          let product = {
+            name: dataProduct["rows"][0]["name"],
+            qty: element["qty"],
+            unit: dataProduct["rows"][0]["unit"],
+            price: dataProduct["rows"][0]["price"]
+          };
+          products.push(product);
+        }
+        response_data.products = products;
+      }
       response = new HttpResponse(
-        data["rows"][0],
+        response_data,
         { statusCode: 200, error: false }
       );
       return res.ok(response);
