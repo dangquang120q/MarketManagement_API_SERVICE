@@ -432,6 +432,23 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  getListShipment: async (req, res) => {
+    let response;
+    let productId = req.body.productId;
+    try {
+      let sql = sqlString.format("select * from ProductReceipt where productId = ?",[productId]);
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(data["rows"], {
+        statusCode: 200,
+        error: false,
+      });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
   getListCategory: async (req, res) => {
     let response;
     try {
