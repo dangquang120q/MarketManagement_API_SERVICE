@@ -329,6 +329,14 @@ module.exports = {
         await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql4);
+        let sql5 = sqlString.format(
+          "update ProductReceipt set remain = remain - ? where id = ?",
+          [element["qty"], element["ProductReceiptId"]]
+        );
+        log(sql5);
+        await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql5);
       }
       if (memberId != "") {
         let priceAfter = total - reducedAmount * 1000;
@@ -373,8 +381,8 @@ module.exports = {
       for (let index = 0; index < products.length; index++) {
         const element = products[index];
         let sql3 = sqlString.format(
-          "insert into ProductReceipt(productId,receiptId,qty,price) values(?,?,?,?)",
-          [element["id"], id, element["qty"], element["importPrice"]]
+          "insert into ProductReceipt(productId,receiptId,qty,price,mfgDate,expDate,remain) values(?,?,?,?,?,?,?)",
+          [element["id"], id, element["qty"], element["importPrice"], element["mfgDate"], element["expDate"], element["qty"]]
         );
         log(sql3);
         await sails
