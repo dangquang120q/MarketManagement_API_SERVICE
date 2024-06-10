@@ -623,6 +623,9 @@ module.exports = {
             unit: dataProduct["rows"][0]["unit"],
             price: dataProduct["rows"][0]["price"],
             importPrice: element["price"],
+            mfgDate: element["mfgDate"],
+            expDate: element["expDate"],
+            remain: element["remain"]
           };
           products.push(product);
         }
