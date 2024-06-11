@@ -382,7 +382,15 @@ module.exports = {
         const element = products[index];
         let sql3 = sqlString.format(
           "insert into ProductReceipt(productId,receiptId,qty,price,mfgDate,expDate,remain) values(?,?,?,?,?,?,?)",
-          [element["id"], id, element["qty"], element["importPrice"], element["mfgDate"], element["expDate"], element["qty"]]
+          [
+            element["id"],
+            id,
+            element["qty"],
+            element["importPrice"],
+            element["mfgDate"],
+            element["expDate"],
+            element["qty"],
+          ]
         );
         log(sql3);
         await sails
@@ -444,7 +452,10 @@ module.exports = {
     let response;
     let productId = req.body.productId;
     try {
-      let sql = sqlString.format("select * from ProductReceipt where productId = ?",[productId]);
+      let sql = sqlString.format(
+        "select * from ProductReceipt where productId = ?",
+        [productId]
+      );
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
@@ -625,7 +636,7 @@ module.exports = {
             importPrice: element["price"],
             mfgDate: element["mfgDate"],
             expDate: element["expDate"],
-            remain: element["remain"]
+            remain: element["remain"],
           };
           products.push(product);
         }
@@ -739,9 +750,8 @@ module.exports = {
           let data2 = await sails
             .getDatastore(process.env.MYSQL_DATASTORE)
             .sendNativeQuery(sql2);
-          let name = data2["rows"][0]["name"];
-          let obj = {};
-          obj.name = name;
+          const product = data2["rows"][0];
+          let obj = { ...product };
           obj.sum = element["total_sold"];
           response_data.push(obj);
         }
@@ -816,7 +826,7 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
-  getListExcessProduct : async (req, res) => {
+  getListExcessProduct: async (req, res) => {
     let response;
     try {
       let response_data = {};
@@ -849,7 +859,7 @@ module.exports = {
           importPrice: element["price"],
           mfgDate: element["mfgDate"],
           expDate: element["expDate"],
-          remain: element["remain"]
+          remain: element["remain"],
         };
         products.push(product);
       }
