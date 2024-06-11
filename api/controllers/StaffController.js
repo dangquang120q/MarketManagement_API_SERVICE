@@ -816,4 +816,51 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  getListExcessProduct : async (req, res) => {
+    let response;
+    try {
+      let response_data = {};
+      let sqlProducts = sqlString.format(
+        `SELECT *
+        FROM ProductReceipt
+        WHERE STR_TO_DATE(expDate, '%m/%d/%Y') <= DATE_ADD(CURDATE(), INTERVAL 10 DAY);        
+        `
+      );
+      let dataProducts = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sqlProducts);
+      let products = [];
+      for (let index = 0; index < dataProducts["rows"].length; index++) {
+        const element = dataProducts["rows"][index];
+        let sqlProduct = sqlString.format(
+          "select * from Product where id = ?",
+          [element["productId"]]
+        );
+        let dataProduct = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sqlProduct);
+        log(JSON.stringify(dataProduct["rows"][0]));
+        let product = {
+          name: dataProduct["rows"][0]["name"],
+          qty: element["qty"],
+          unit: dataProduct["rows"][0]["unit"],
+          price: dataProduct["rows"][0]["price"],
+          importPrice: element["price"],
+          mfgDate: element["mfgDate"],
+          expDate: element["expDate"],
+          remain: element["remain"]
+        };
+        products.push(product);
+      }
+      log(products);
+      response_data.products = products;
+      response = new HttpResponse(products, {
+        statusCode: 200,
+        error: false,
+      });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
 };
