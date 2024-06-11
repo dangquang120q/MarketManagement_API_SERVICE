@@ -852,6 +852,7 @@ module.exports = {
           .sendNativeQuery(sqlProduct);
         log(JSON.stringify(dataProduct["rows"][0]));
         let product = {
+          id: element["id"],
           name: dataProduct["rows"][0]["name"],
           qty: element["qty"],
           unit: dataProduct["rows"][0]["unit"],
