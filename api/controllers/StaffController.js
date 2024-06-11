@@ -453,7 +453,7 @@ module.exports = {
     let productId = req.body.productId;
     try {
       let sql = sqlString.format(
-        "select * from ProductReceipt where productId = ?",
+        "select * from ProductReceipt where productId = ? and isCancel = 0",
         [productId]
       );
       let data = await sails
@@ -612,7 +612,7 @@ module.exports = {
           .sendNativeQuery(sqlSupplier);
         response_data.supplier = dataSupplier["rows"][0];
         let sqlProducts = sqlString.format(
-          "select * from ProductReceipt where receiptId = ?",
+          "select * from ProductReceipt where receiptId = ? and isCancel = 0",
           [id]
         );
         let dataProducts = await sails
@@ -832,8 +832,8 @@ module.exports = {
       let response_data = {};
       let sqlProducts = sqlString.format(
         `SELECT *
-        FROM ProductReceipt
-        WHERE STR_TO_DATE(expDate, '%m/%d/%Y') <= DATE_ADD(CURDATE(), INTERVAL 10 DAY);                         
+          FROM ProductReceipt
+          WHERE isCancel = 0 and STR_TO_DATE(expDate, '%m/%d/%Y') <= DATE_ADD(CURDATE(), INTERVAL 10 DAY);                         
         `
       );
       let dataProducts = await sails
@@ -889,14 +889,14 @@ module.exports = {
       await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
-        let sql2 = sqlString.format(
-          "update Product set total = total - ? where id = ?",
-          [remain,productId]
-        );
-        log(sql2);
-        await sails
-          .getDatastore(process.env.MYSQL_DATASTORE)
-          .sendNativeQuery(sql2);
+      let sql2 = sqlString.format(
+        "update Product set total = total - ? where id = ?",
+        [remain,productId]
+      );
+      log(sql2);
+      await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql2);
       response = new HttpResponse({
         statusCode: 200,
         error: false,
