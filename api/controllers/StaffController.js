@@ -823,7 +823,8 @@ module.exports = {
       let sqlProducts = sqlString.format(
         `SELECT *
         FROM ProductReceipt
-        WHERE STR_TO_DATE(expDate, '%m/%d/%Y') <= DATE_ADD(CURDATE(), INTERVAL 10 DAY);        
+        WHERE DATEDIFF(STR_TO_DATE(expDate, '%m/%d/%Y'), STR_TO_DATE(mfgDate, '%m/%d/%Y')) * 0.1 >= DATEDIFF(CURDATE(), STR_TO_DATE(mfgDate, '%m/%d/%Y'))
+        OR STR_TO_DATE(expDate, '%m/%d/%Y') < CURDATE();                   
         `
       );
       let dataProducts = await sails
