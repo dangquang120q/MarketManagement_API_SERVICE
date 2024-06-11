@@ -737,7 +737,7 @@ module.exports = {
           GROUP BY 
               productId
           ORDER BY 
-            total_sold DESC LIMIT 10;    
+            total_sold DESC ;    
         `);
         let data = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
