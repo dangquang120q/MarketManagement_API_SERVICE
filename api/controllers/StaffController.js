@@ -1088,6 +1088,7 @@ module.exports = {
         list: data["rows"][0],
         promotional: data["rows"][1][0],
       };
+      console.log(data["rows"]);
       response = new HttpResponse(resData, {
         statusCode: 200,
         error: false,
