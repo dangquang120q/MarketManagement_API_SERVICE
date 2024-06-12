@@ -462,6 +462,7 @@ module.exports = {
         if (data2["rows"].length > 0) {
           data["rows"][index].promoPrice = data2["rows"][0]["promoPrice"];
         }
+        data["rows"][index].promoPrice = data["rows"][index]["price"];
       }
       response = new HttpResponse(data["rows"], {
         statusCode: 200,
