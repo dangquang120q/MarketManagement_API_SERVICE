@@ -441,7 +441,8 @@ module.exports = {
         .sendNativeQuery(sql);
       for (let index = 0; index < data["rows"].length; index++) {
         const element = data["rows"][index];
-        let sql2 = sqlString.format(`
+        let sql2 = sqlString.format(
+          `
             SELECT 
                 p.id AS productId,
                 pp.promoPrice
@@ -455,7 +456,9 @@ module.exports = {
                 p.id = ? and
                 CURRENT_DATE() BETWEEN pr.startDate AND pr.endDate OR
                 (CURRENT_DATE() >= pr.startDate AND pr.endDate IS NULL);
-        `,[element["id"]]);
+        `,
+          [element["id"]]
+        );
         let data2 = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql2);
@@ -916,7 +919,7 @@ module.exports = {
         .sendNativeQuery(sql);
       let sql2 = sqlString.format(
         "update Product set total = total - ? where id = ?",
-        [remain,productId]
+        [remain, productId]
       );
       log(sql2);
       await sails
@@ -947,7 +950,7 @@ module.exports = {
         .sendNativeQuery(sql);
       let sql2 = sqlString.format(
         "update Product set saleTotal = saleTotal + ? where id = ?",
-        [count,productId]
+        [count, productId]
       );
       log(sql2);
       await sails
@@ -998,7 +1001,9 @@ module.exports = {
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
       } else {
-        let sql = sqlString.format("delete from Promotional where id = ?", [id]);
+        let sql = sqlString.format("delete from Promotional where id = ?", [
+          id,
+        ]);
         await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
@@ -1038,7 +1043,10 @@ module.exports = {
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
       } else {
-        let sql = sqlString.format("delete from ProductPromotional where id = ?", [id]);
+        let sql = sqlString.format(
+          "delete from ProductPromotional where id = ?",
+          [id]
+        );
         await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql);
@@ -1072,7 +1080,10 @@ module.exports = {
     let response;
     let id = req.body.id;
     try {
-      let sql = sqlString.format("select * from ProductPromotional where promotionalId = ?",[id]);
+      let sql = sqlString.format(
+        "select PP.*, P.name, P.price, P.unit, P.total, P.saleTotal  from ProductPromotional as PP join Product as P on P.id = PP.productId where PP.promotionalId = ?",
+        [id]
+      );
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
