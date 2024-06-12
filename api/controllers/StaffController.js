@@ -1080,14 +1080,15 @@ module.exports = {
     let response;
     let id = req.body.id;
     try {
-      let sql = sqlString.format(
-        "select PP.*, P.name, P.price, P.unit, P.total, P.saleTotal  from ProductPromotional as PP join Product as P on P.id = PP.productId where PP.promotionalId = ?",
-        [id]
-      );
+      let sql = sqlString.format("CALL sp_get_list_promo_product(?)", [id]);
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
-      response = new HttpResponse(data["rows"], {
+      const resData = {
+        list: data["rows"][0],
+        promotional: data["rows"][1][0],
+      };
+      response = new HttpResponse(resData, {
         statusCode: 200,
         error: false,
       });
