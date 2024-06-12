@@ -439,6 +439,28 @@ module.exports = {
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
+      for (let index = 0; index < data["rows"].length; index++) {
+        const element = data["rows"][index];
+        let sql2 = sqlString.format(`
+            SELECT 
+                p.id AS productId,
+                pp.promoPrice
+            FROM 
+                Product AS p
+            LEFT JOIN 
+                ProductPromotional AS pp ON p.id = pp.productId
+            LEFT JOIN 
+                Promotional AS pr ON pp.promotionalId = pr.id
+            WHERE
+                p.id = ? and
+                CURRENT_DATE() BETWEEN pr.startDate AND pr.endDate OR
+                (CURRENT_DATE() >= pr.startDate AND pr.endDate IS NULL);
+        `,[element["id"]]);
+        let data2 = await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql2);
+        data["rows"][index].promoPrice = data2["rows"][0]["promoPrice"] || 0;
+      }
       response = new HttpResponse(data["rows"], {
         statusCode: 200,
         error: false,
@@ -901,6 +923,127 @@ module.exports = {
         statusCode: 200,
         error: false,
       });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  releaseProduct: async (req, res) => {
+    let response;
+    let productId = req.body.productId;
+    let id = req.body.id;
+    let count = req.body.count;
+    try {
+      let sql = sqlString.format(
+        "update ProductReceipt set remain = remain - ? where id = ?",
+        [count, id]
+      );
+      log(sql);
+      await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      let sql2 = sqlString.format(
+        "update Product set saleTotal = saleTotal + ? where id = ?",
+        [count,productId]
+      );
+      log(sql2);
+      await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql2);
+      response = new HttpResponse({
+        statusCode: 200,
+        error: false,
+      });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  changePromotional: async (req, res) => {
+    let response;
+    let type = req.body.type;
+    let id = req.body.id;
+    let name = req.body.name;
+    let startDate = req.body.startDate;
+    let endDate = req.body.endDate;
+    try {
+      if (type == 1) {
+        let sql = sqlString.format(
+          "insert into Promotional(name,startDate,endDate) values(?,?,?)",
+          [name, startDate, endDate]
+        );
+        await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+        // for (let index = 0; index < listPromo.length; index++) {
+        //   const element = listPromo[index];
+        //   let sql2 = sqlString.format(
+        //     "insert into ProductPromotional(promotionalId,productId,promoPrice) values(?,?,?)",
+        //     [insertedId, element["productId"], element["promoPrice"]]
+        //   );
+        //   await sails
+        //     .getDatastore(process.env.MYSQL_DATASTORE)
+        //     .sendNativeQuery(sql2);
+        // }
+      } else if (type == 2) {
+        let sql = sqlString.format(
+          "update Promotional set name = ?,startDate = ?,endDate = ? where id = ?",
+          [name, startDate, endDate, id]
+        );
+        log(sql);
+        await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+      } else {
+        let sql = sqlString.format("delete from Promotional where id = ?", [id]);
+        await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+      }
+      response = new HttpResponse(
+        { msg: "Change Promotional Successful" },
+        { statusCode: 200, error: false }
+      );
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  changeProductPromotional: async (req, res) => {
+    let response;
+    let type = req.body.type;
+    let id = req.body.id;
+    let promotionalId = req.body.promotionalId;
+    let productId = req.body.productId;
+    let promoPrice = req.body.promoPrice;
+    try {
+      if (type == 1) {
+        let sql = sqlString.format(
+          "insert into ProductPromotional(promotionalId,productId,promoPrice) values(?,?,?)",
+          [promotionalId, productId, promoPrice]
+        );
+        await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+      } else if (type == 2) {
+        let sql = sqlString.format(
+          "update ProductPromotional set promoPrice = ? where id = ?",
+          [promoPrice, id]
+        );
+        log(sql);
+        await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+      } else {
+        let sql = sqlString.format("delete from ProductPromotional where id = ?", [id]);
+        await sails
+          .getDatastore(process.env.MYSQL_DATASTORE)
+          .sendNativeQuery(sql);
+      }
+      response = new HttpResponse(
+        { msg: "Change ProductPromotional Successful" },
+        { statusCode: 200, error: false }
+      );
       return res.ok(response);
     } catch (error) {
       return res.serverError("Something bad happened on the server: " + error);
