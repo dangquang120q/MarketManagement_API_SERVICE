@@ -459,7 +459,9 @@ module.exports = {
         let data2 = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql2);
-        data["rows"][index].promoPrice = data2["rows"][0]["promoPrice"] || 0;
+        if (data2["rows"].length > 0) {
+          data["rows"][index].promoPrice = data2["rows"][0]["promoPrice"];
+        }
       }
       response = new HttpResponse(data["rows"], {
         statusCode: 200,
