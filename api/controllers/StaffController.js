@@ -1052,4 +1052,37 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  getListPromotional: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format("select * from Promotional");
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(data["rows"], {
+        statusCode: 200,
+        error: false,
+      });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getListProductPromotional: async (req, res) => {
+    let response;
+    let id = req.body.id;
+    try {
+      let sql = sqlString.format("select * from ProductPromotional where promotionalId = ?",[id]);
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(data["rows"], {
+        statusCode: 200,
+        error: false,
+      });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
 };
