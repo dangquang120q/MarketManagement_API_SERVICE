@@ -315,7 +315,7 @@ module.exports = {
         const element = products[index];
         let sql3 = sqlString.format(
           "insert into ProductInvoice(productId,invoiceId,qty,price) values(?,?,?,?)",
-          [element["id"], id, element["qty"], element["price"]]
+          [element["id"], id, element["qty"], element["promoPrice"]]
         );
         log(sql3);
         await sails
