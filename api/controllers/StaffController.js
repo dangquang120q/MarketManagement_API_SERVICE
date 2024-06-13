@@ -443,19 +443,12 @@ module.exports = {
         const element = data["rows"][index];
         let sql2 = sqlString.format(
           `
-            SELECT 
-                p.id AS productId,
-                pp.promoPrice
-            FROM 
-                Product AS p
-            LEFT JOIN 
-                ProductPromotional AS pp ON p.id = pp.productId
-            LEFT JOIN 
-                Promotional AS pr ON pp.promotionalId = pr.id
-            WHERE
-                p.id = ? and
-                CURRENT_DATE() BETWEEN pr.startDate AND pr.endDate OR
-                (CURRENT_DATE() >= pr.startDate AND pr.endDate IS NULL);
+          SELECT p.id AS productId, p.name, pp.promoPrice
+          FROM Product AS p
+          JOIN ProductPromotional AS pp ON p.id = pp.productId
+          JOIN Promotional AS pr ON pp.promotionalId = pr.id
+          WHERE p.id = ? AND CURRENT_TIMESTAMP() >= STR_TO_DATE(pr.startDate, '%m/%d/%Y') 
+          and CURRENT_TIMESTAMP() <= STR_TO_DATE(pr.endDate, '%m/%d/%Y');
         `,
           [element["id"]]
         );
