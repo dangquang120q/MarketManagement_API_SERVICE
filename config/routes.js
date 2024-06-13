@@ -20,13 +20,12 @@ module.exports.routes = {
 
   "/": { view: "pages/homepage" },
 
-  
   "POST /addMember": "UsersController.addMember",
   "POST /updateMember": "UsersController.updateMember",
   "POST /deleteMember": "UsersController.deleteMember",
   "POST /getMember": "UsersController.getMember",
   "POST /getListMember": "UsersController.getListMember",
-  
+
   "POST /login": "StaffController.login",
   "POST /changeProduct": "StaffController.changeProduct",
   "POST /changeCategory": "StaffController.changeCategory",
@@ -53,10 +52,12 @@ module.exports.routes = {
   "POST /changeProductPromotional": "StaffController.changeProductPromotional",
   "POST /changePromotional": "StaffController.changePromotional",
   "POST /getListPromotional": "StaffController.getListPromotional",
-  "POST /getListProductPromotional": "StaffController.getListProductPromotional",
+  "POST /getListProductPromotional":
+    "StaffController.getListProductPromotional",
 
   "POST /statistics": "StaffController.statistics",
   "POST /productStatistics": "StaffController.productStatistics",
+  "POST /getListCancel": "StaffController.getListCancel",
   /***************************************************************************
    *                                                                          *
    * More custom routes here...                                               *

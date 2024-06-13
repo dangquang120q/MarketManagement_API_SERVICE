@@ -323,7 +323,7 @@ module.exports = {
           .sendNativeQuery(sql3);
         let sql4 = sqlString.format(
           "update Product set total = total - ? and saleTotal = saleTotal - ? where id = ?",
-          [element["qty"],element["qty"], element["id"]]
+          [element["qty"], element["qty"], element["id"]]
         );
         log(sql4);
         await sails
@@ -457,8 +457,7 @@ module.exports = {
           .sendNativeQuery(sql2);
         if (data2["rows"].length > 0) {
           data["rows"][index].promoPrice = data2["rows"][0]["promoPrice"];
-        }
-        else{
+        } else {
           data["rows"][index].promoPrice = data["rows"][index]["price"];
         }
       }
@@ -1085,6 +1084,25 @@ module.exports = {
       };
       console.log(data["rows"]);
       response = new HttpResponse(resData, {
+        statusCode: 200,
+        error: false,
+      });
+      return res.ok(response);
+    } catch (error) {
+      return res.serverError("Something bad happened on the server: " + error);
+    }
+  },
+  getListCancel: async (req, res) => {
+    let response;
+    try {
+      let sql = sqlString.format(`
+        SELECT PR.*, P.name FROM ProductReceipt as PR
+        JOIN Product as P ON PR.productId = P.id WHERE isCancel = 1;
+      `);
+      let data = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+      response = new HttpResponse(data["rows"], {
         statusCode: 200,
         error: false,
       });
