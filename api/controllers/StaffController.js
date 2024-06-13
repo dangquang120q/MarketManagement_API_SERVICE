@@ -322,21 +322,21 @@ module.exports = {
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql3);
         let sql4 = sqlString.format(
-          "update Product set total = total - ? where id = ?",
-          [element["qty"], element["id"]]
+          "update Product set total = total - ? and saleTotal = saleTotal - ? where id = ?",
+          [element["qty"],element["qty"], element["id"]]
         );
         log(sql4);
         await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql4);
-        let sql5 = sqlString.format(
-          "update ProductReceipt set remain = remain - ? where id = ?",
-          [element["qty"], element["ProductReceiptId"]]
-        );
-        log(sql5);
-        await sails
-          .getDatastore(process.env.MYSQL_DATASTORE)
-          .sendNativeQuery(sql5);
+        // let sql5 = sqlString.format(
+        //   "update ProductReceipt set remain = remain - ? where id = ?",
+        //   [element["qty"], element["ProductReceiptId"]]
+        // );
+        // log(sql5);
+        // await sails
+        //   .getDatastore(process.env.MYSQL_DATASTORE)
+        //   .sendNativeQuery(sql5);
       }
       if (memberId != "") {
         let priceAfter = total - reducedAmount * 1000;
