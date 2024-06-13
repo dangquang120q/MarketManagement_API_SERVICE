@@ -452,11 +452,11 @@ module.exports = {
         `,
           [element["id"]]
         );
-        log(sql2);
         let data2 = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql2);
         if (data2["rows"].length > 0) {
+          log(JSON.stringify(data2["rows"][0]));
           data["rows"][index].promoPrice = data2["rows"][0]["promoPrice"];
         }
         data["rows"][index].promoPrice = data["rows"][index]["price"];
