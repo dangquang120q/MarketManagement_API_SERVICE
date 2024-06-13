@@ -452,6 +452,7 @@ module.exports = {
         `,
           [element["id"]]
         );
+        log(sql2);
         let data2 = await sails
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql2);
