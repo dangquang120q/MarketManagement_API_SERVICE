@@ -322,7 +322,7 @@ module.exports = {
           .getDatastore(process.env.MYSQL_DATASTORE)
           .sendNativeQuery(sql3);
         let sql4 = sqlString.format(
-          "update Product set total = total - ? and saleTotal = saleTotal - ? where id = ?",
+          "update Product set total = total - ?, saleTotal = saleTotal - ? where id = ?",
           [element["qty"], element["qty"], element["id"]]
         );
         log(sql4);
