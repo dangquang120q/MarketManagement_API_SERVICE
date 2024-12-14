@@ -590,7 +590,7 @@ module.exports = {
   getListInvoice: async (req, res) => {
     let response;
     try {
-      let sql = sqlString.format("select * from Invoice");
+      let sql = sqlString.format("select * from Invoice order by createdDate desc;");
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
@@ -676,7 +676,7 @@ module.exports = {
   getListReceipt: async (req, res) => {
     let response;
     try {
-      let sql = sqlString.format("select * from Receipt");
+      let sql = sqlString.format("select * from Receipt order by createdDate desc;");
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
