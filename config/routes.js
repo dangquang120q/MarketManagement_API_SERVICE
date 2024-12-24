@@ -38,6 +38,9 @@ module.exports.routes = {
 
   "POST /getListStaff": "StaffController.getListStaff",
   "POST /getListProduct": "StaffController.getListProduct",
+  "POST /getListRecommendProduct": "StaffController.getListRecommendProduct",
+  "POST /forecastProductDemand": "StaffController.forecastProductDemand",
+  "POST /forecastProductRevenue": "StaffController.forecastProductRevenue",
   "POST /getListShipment": "StaffController.getListShipment",
   "POST /getListCategory": "StaffController.getListCategory",
   "POST /getListSupplier": "StaffController.getListSupplier",

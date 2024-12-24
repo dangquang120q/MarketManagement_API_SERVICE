@@ -9,6 +9,12 @@ const sqlString = require("sqlstring");
 const { HttpResponse } = require("../services/http-response");
 const { log } = require("../services/log");
 const { sync } = require("load-json-file");
+const { PythonShell } = require('python-shell');
+const { spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const tempFilePath = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/temp_data.json';
+const tempFilePath2 = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/temp2_data.json';
 
 module.exports = {
   login: async (req, res) => {
@@ -470,6 +476,252 @@ module.exports = {
       return res.serverError("Something bad happened on the server: " + error);
     }
   },
+  getListRecommendProduct: async (req, res) => {
+    try {
+      // 🛒 **1. Lấy danh sách sản phẩm**
+      const sql = sqlString.format("SELECT * FROM Product");
+      const productData = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+
+      // 🧾 **2. Lấy thông tin hóa đơn của khách hàng**
+      const { memberId } = req.body;
+      const invoiceSql = sqlString.format(
+        `SELECT Invoice.memberId, ProductInvoice.productId, ProductInvoice.qty 
+         FROM Invoice 
+         INNER JOIN ProductInvoice ON Invoice.id = ProductInvoice.invoiceId 
+         WHERE Invoice.memberId = ?`, 
+        [memberId]
+      );
+      const invoiceData = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(invoiceSql);
+
+      // 📊 **3. Chuẩn bị dữ liệu truyền cho Python**
+      const customerData = {
+        memberId: memberId,
+        invoiceData: invoiceData.rows,
+        products: productData.rows,
+      };
+
+      console.log("Data sent to Python script:", customerData);
+
+      // 🐍 **4. Gọi script Python để lấy gợi ý**
+      const pythonScript = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/recommend.py';
+      const pythonProcess = spawn('python', [pythonScript, JSON.stringify(customerData)]);
+
+      let pythonData = '';
+      let pythonError = '';
+
+      pythonProcess.stdout.on('data', (data) => {
+        pythonData += data.toString();
+      });
+
+      pythonProcess.stderr.on('data', (data) => {
+        pythonError += data.toString();
+      });
+
+      pythonProcess.on('close', (code) => {
+        if (code !== 0) {
+          console.error(`Python script exited with code ${code}: ${pythonError}`);
+          return res.serverError(`Python script error: ${pythonError}`);
+        }
+
+        try {
+          const recommendedProducts = JSON.parse(pythonData);
+          
+          const response = new HttpResponse(recommendedProducts, {
+            statusCode: 200,
+            error: false,
+          });
+          return res.ok(response);
+        } catch (parseError) {
+          console.error("Failed to parse Python response:", parseError);
+          return res.serverError("Failed to parse Python response.");
+        }
+      });
+
+    } catch (error) {
+      console.error("Error in getListRecommendProduct:", error);
+      return res.serverError("Something bad happened on the server: " + error.message);
+    }
+  },
+  forecastProductDemand: async (req, res) => {
+    try {
+      // 🛒 Lấy dữ liệu lịch sử bán hàng
+      const sql = sqlString.format(`
+        SELECT DATE(Invoice.createdDate) as date, ProductInvoice.productId, Product.price, Product.name, SUM(ProductInvoice.qty) as qty 
+        FROM Invoice 
+        INNER JOIN ProductInvoice ON Invoice.id = ProductInvoice.invoiceId 
+        INNER JOIN Product ON Product.id = ProductInvoice.productId
+        GROUP BY DATE(Invoice.createdDate), ProductInvoice.productId, Product.price, Product.name
+      `);
+      const salesData = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+  
+      // 📊 Chuẩn bị dữ liệu cho Python
+      const forecastData = salesData.rows.map(row => ({
+        date: row.date,
+        productId: row.productId,
+        name: row.name,
+        qty: row.qty,
+        price: row.price  // Thêm price vào dữ liệu
+      }));
+      fs.writeFileSync(tempFilePath, JSON.stringify({ data: forecastData }));
+      
+      // 🐍 Gọi script Python để dự báo
+      const pythonScript = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/forecast_demand.py';
+      const pythonProcess = spawn('python', [pythonScript, tempFilePath]);
+  
+      let pythonData = '';
+      let pythonError = '';
+  
+      pythonProcess.stdout.on('data', (data) => {
+        pythonData += data.toString();
+      });
+  
+      pythonProcess.stderr.on('data', (data) => {
+        pythonError += data.toString();
+      });
+  
+      pythonProcess.on('close', async (code) => {
+        if (code !== 0) {
+          console.error(`Python script exited with code ${code}: ${pythonError}`);
+          return res.serverError(`Python script error: ${pythonError}`);
+        }
+  
+        try {
+          const forecastResult = JSON.parse(pythonData);
+          // Sắp xếp theo doanh thu (revenue) giảm dần và lấy mặt hàng bán chạy nhất
+          const sortedResult = Object.entries(forecastResult)
+            .map(([productId, forecasts]) => ({
+              productId,
+              totalRevenue: forecasts.reduce((sum, forecast) => sum + forecast.revenue, 0)
+            }))
+            .sort((a, b) => b.totalRevenue - a.totalRevenue)
+            .slice(0,10);
+            const sortedDescResult = Object.entries(forecastResult)
+            .map(([productId, forecasts]) => ({
+              productId,
+              totalRevenue: forecasts.reduce((sum, forecast) => sum + forecast.revenue, 0)
+            }))
+            .sort((a, b) => a.totalRevenue - b.totalRevenue)
+            .slice(0,10);
+            async function getProductDetails(productIds) {
+              const sql = sqlString.format(`
+                SELECT *
+                FROM Product
+                WHERE id IN (?)`, [productIds]);
+    
+              const result = await sails.getDatastore(process.env.MYSQL_DATASTORE).sendNativeQuery(sql);
+              return result.rows;
+            }
+            
+            // Truy vấn thông tin sản phẩm cho các sản phẩm bán chạy nhất và bán kém nhất
+            const topSellingProductIds = sortedResult.map(item => item.productId);
+            const bottomSellingProductIds = sortedDescResult.map(item => item.productId);
+            const [topSellingProducts, bottomSellingProducts] = await Promise.all([
+              getProductDetails(topSellingProductIds),
+              getProductDetails(bottomSellingProductIds)
+            ]);  
+          const response = new HttpResponse({
+            HangBanChay: topSellingProducts, // Lấy top 5 sản phẩm bán chạy nhất
+            HangBanKem: bottomSellingProducts
+          }, {
+            statusCode: 200,
+            error: false,
+          });
+          return res.ok(response);
+        } catch (parseError) {
+          console.error("Failed to parse Python response:", parseError);
+          return res.serverError("Failed to parse Python response.");
+        }
+      });
+  
+    } catch (error) {
+      console.error("Error in forecastProductDemand:", error);
+      return res.serverError("Something bad happened on the server: " + error.message);
+    }
+  },
+  forecastProductRevenue: async (req, res) => {
+    try {
+      // 🛒 Lấy dữ liệu lịch sử bán hàng
+      const sql = sqlString.format(`
+        SELECT DATE(Invoice.createdDate) as date, ProductInvoice.productId, Product.price, Product.name, SUM(ProductInvoice.qty) as qty 
+        FROM Invoice 
+        INNER JOIN ProductInvoice ON Invoice.id = ProductInvoice.invoiceId 
+        INNER JOIN Product ON Product.id = ProductInvoice.productId
+        GROUP BY DATE(Invoice.createdDate), ProductInvoice.productId, Product.price, Product.name
+      `);
+      const salesData = await sails
+        .getDatastore(process.env.MYSQL_DATASTORE)
+        .sendNativeQuery(sql);
+  
+      // 📊 Chuẩn bị dữ liệu cho Python
+      const forecastData = salesData.rows.map(row => ({
+        date: row.date,
+        productId: row.productId,
+        name: row.name,
+        qty: row.qty,
+        price: row.price  // Thêm price vào dữ liệu
+      }));
+      fs.writeFileSync(tempFilePath2, JSON.stringify({ data: forecastData }));
+  
+      // 🐍 Gọi script Python để dự báo
+      const pythonScript = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/forecast_revenue.py';
+      const pythonProcess = spawn('python', [pythonScript, tempFilePath]);
+  
+      let pythonData = '';
+      let pythonError = '';
+  
+      pythonProcess.stdout.on('data', (data) => {
+        pythonData += data.toString();
+      });
+  
+      pythonProcess.stderr.on('data', (data) => {
+        pythonError += data.toString();
+      });
+  
+      pythonProcess.on('close', async (code) => {
+        if (code !== 0) {
+          console.error(`Python script exited with code ${code}: ${pythonError}`);
+          return res.serverError(`Python script error: ${pythonError}`);
+        }
+  
+        try {
+          const forecastResult = JSON.parse(pythonData);
+          console.log(forecastResult);
+  
+          // Lấy doanh thu dự báo cho 3 tháng tới, nhóm theo tháng
+          const monthlyRevenue = Object.entries(forecastResult)
+            .map(([productId, forecasts]) => {
+              return forecasts.map(month => ({
+                month: month.month.toString(),  // Tháng
+                totalRevenue: month.revenue     // Tổng doanh thu
+              }));
+            })
+            .flat();  // Làm phẳng kết quả thành một mảng
+  
+          // Trả về doanh thu dự báo theo tháng
+          const response = new HttpResponse({
+            revenueForecastByMonth: monthlyRevenue.slice(-3)
+          }, {
+            statusCode: 200,
+            error: false,
+          });
+          return res.ok(response);
+        } catch (parseError) {
+          console.error("Failed to parse Python response:", parseError);
+          return res.serverError("Failed to parse Python response.");
+        }
+      });
+  
+    } catch (error) {
+      console.error("Error in forecastProductRevenue:", error);
+      return res.serverError("Something bad happened on the server: " + error.message);
+    }
+  },  
   getListShipment: async (req, res) => {
     let response;
     let productId = req.body.productId;

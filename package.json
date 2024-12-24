@@ -21,6 +21,7 @@
     "mongoose": "^7.4.4",
     "node-cron": "^3.0.3",
     "node-datetime": "^2.1.2",
+    "python-shell": "^5.0.0",
     "redis": "^4.6.12",
     "sails": "^1.5.2",
     "sails-hook-grunt": "^5.0.0",
