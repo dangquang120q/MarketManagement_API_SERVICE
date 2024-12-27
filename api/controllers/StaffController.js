@@ -303,7 +303,7 @@ module.exports = {
     let response;
     let id = req.body.id;
     let staffId = req.body.staffId;
-    let memberId = req.body.memberId || "";
+    let memberId = req.body.memberId || "default";
     let products = req.body.products;
     let total = req.body.total;
     let reducedAmount = req.body.reducedAmount;
@@ -691,7 +691,6 @@ module.exports = {
   
         try {
           const forecastResult = JSON.parse(pythonData);
-          console.log(forecastResult);
   
           // Lấy doanh thu dự báo cho 3 tháng tới, nhóm theo tháng
           const monthlyRevenue = Object.entries(forecastResult)
@@ -705,7 +704,7 @@ module.exports = {
   
           // Trả về doanh thu dự báo theo tháng
           const response = new HttpResponse({
-            revenueForecastByMonth: monthlyRevenue.slice(-3)
+            revenueForecastByMonth: monthlyRevenue.slice(-6)
           }, {
             statusCode: 200,
             error: false,

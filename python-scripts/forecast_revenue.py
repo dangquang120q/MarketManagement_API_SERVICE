@@ -9,7 +9,7 @@ def forecast_demand_for_product(product_df, product_id, price):
     model = Prophet()
     model.fit(product_df)
     
-    future = model.make_future_dataframe(periods=90)  # Dự báo 90 ngày tới (3 tháng)
+    future = model.make_future_dataframe(periods=180)  # Dự báo 90 ngày tới (3 tháng)
     forecast = model.predict(future)
     
     # Chuyển đổi Timestamp thành string
