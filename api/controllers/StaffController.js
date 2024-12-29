@@ -439,38 +439,36 @@ module.exports = {
     }
   },
   getListProduct: async (req, res) => {
-    let response;
     try {
-      let sql = sqlString.format("select * from Product");
+      let sql = sqlString.format(`
+        SELECT 
+            p.id,
+            p.name,
+            p.price,
+            p.unit,
+            p.total,
+            p.saleTotal,
+            p.categoryId,
+            COALESCE(pp.promoPrice, p.price) AS promoPrice
+        FROM 
+            Product AS p
+        LEFT JOIN 
+            ProductPromotional AS pp ON p.id = pp.productId
+        LEFT JOIN 
+            Promotional AS pr ON pp.promotionalId = pr.id
+            AND CURRENT_TIMESTAMP() >= STR_TO_DATE(pr.startDate, '%m/%d/%Y')
+            AND CURRENT_TIMESTAMP() <= STR_TO_DATE(pr.endDate, '%m/%d/%Y');
+      `);
+  
       let data = await sails
         .getDatastore(process.env.MYSQL_DATASTORE)
         .sendNativeQuery(sql);
-      for (let index = 0; index < data["rows"].length; index++) {
-        const element = data["rows"][index];
-        let sql2 = sqlString.format(
-          `
-          SELECT p.id AS productId, p.name, pp.promoPrice
-          FROM Product AS p
-          JOIN ProductPromotional AS pp ON p.id = pp.productId
-          JOIN Promotional AS pr ON pp.promotionalId = pr.id
-          WHERE p.id = ? AND CURRENT_TIMESTAMP() >= STR_TO_DATE(pr.startDate, '%m/%d/%Y') 
-          and CURRENT_TIMESTAMP() <= STR_TO_DATE(pr.endDate, '%m/%d/%Y');
-        `,
-          [element["id"]]
-        );
-        let data2 = await sails
-          .getDatastore(process.env.MYSQL_DATASTORE)
-          .sendNativeQuery(sql2);
-        if (data2["rows"].length > 0) {
-          data["rows"][index].promoPrice = data2["rows"][0]["promoPrice"];
-        } else {
-          data["rows"][index].promoPrice = data["rows"][index]["price"];
-        }
-      }
-      response = new HttpResponse(data["rows"], {
+  
+      let response = new HttpResponse(data["rows"], {
         statusCode: 200,
         error: false,
       });
+  
       return res.ok(response);
     } catch (error) {
       return res.serverError("Something bad happened on the server: " + error);
