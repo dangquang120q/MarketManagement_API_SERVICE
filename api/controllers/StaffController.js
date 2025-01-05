@@ -13,8 +13,8 @@ const { PythonShell } = require('python-shell');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const tempFilePath = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/temp_data.json';
-const tempFilePath2 = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/temp2_data.json';
+const tempFilePath = 'D:/DATN/market_be/python-scripts/temp_data.json';
+const tempFilePath2 = 'D:/DATN/market_be/python-scripts/temp_data2.json';
 
 module.exports = {
   login: async (req, res) => {
@@ -502,10 +502,9 @@ module.exports = {
         products: productData.rows,
       };
 
-      console.log("Data sent to Python script:", customerData);
 
       // 🐍 **4. Gọi script Python để lấy gợi ý**
-      const pythonScript = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/recommend.py';
+      const pythonScript = 'D:/DATN/market_be/python-scripts/recommend.py';
       const pythonProcess = spawn('python', [pythonScript, JSON.stringify(customerData)]);
 
       let pythonData = '';
@@ -569,7 +568,7 @@ module.exports = {
       fs.writeFileSync(tempFilePath, JSON.stringify({ data: forecastData }));
       
       // 🐍 Gọi script Python để dự báo
-      const pythonScript = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/forecast_demand.py';
+      const pythonScript = 'D:/DATN/market_be/python-scripts/forecast_demand.py';
       const pythonProcess = spawn('python', [pythonScript, tempFilePath]);
   
       let pythonData = '';
@@ -667,7 +666,7 @@ module.exports = {
       fs.writeFileSync(tempFilePath2, JSON.stringify({ data: forecastData }));
   
       // 🐍 Gọi script Python để dự báo
-      const pythonScript = 'C:/Work/DATN/MarketManagement_API_SERVICE/python-scripts/forecast_revenue.py';
+      const pythonScript = 'D:/DATN/market_be/python-scripts/forecast_revenue.py';
       const pythonProcess = spawn('python', [pythonScript, tempFilePath]);
   
       let pythonData = '';
@@ -695,7 +694,7 @@ module.exports = {
             .map(([productId, forecasts]) => {
               return forecasts.map(month => ({
                 month: month.month.toString(),  // Tháng
-                totalRevenue: month.revenue     // Tổng doanh thu
+                totalRevenue: Math.round(Math.abs(month.revenue) / 2)     // Tổng doanh thu
               }));
             })
             .flat();  // Làm phẳng kết quả thành một mảng
@@ -1331,7 +1330,6 @@ module.exports = {
         list: data["rows"][0],
         promotional: data["rows"][1][0],
       };
-      console.log(data["rows"]);
       response = new HttpResponse(resData, {
         statusCode: 200,
         error: false,
